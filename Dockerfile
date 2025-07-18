@@ -12,7 +12,7 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # Install Playwright browsers with dependencies
-RUN playwright install --with-deps
+RUN playwright install chromium --with-deps
 
 # Optional: Set environment variables
 ENV PYTHONUNBUFFERED=1
