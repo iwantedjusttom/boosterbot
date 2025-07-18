@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # ✅ Make sure runtime knows where to find the browsers
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
 
 # ✅ Install Playwright browsers during image build
 RUN playwright install-deps && playwright install chromium
