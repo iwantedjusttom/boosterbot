@@ -1,22 +1,25 @@
-# Use official Playwright image with Python and Chromium
-FROM mcr.microsoft.com/playwright/python:v1.53.0-jammy
+FROM python:3.10-slim
 
-# Set working directory
+# Install system dependencies needed for Playwright/Chromium
+RUN apt-get update && apt-get install -y \
+    curl wget gnupg libglib2.0-0 libnss3 libgconf-2-4 libfontconfig1 \
+    libxss1 libasound2 libxtst6 libxrandr2 xdg-utils libatk-bridge2.0-0 \
+    libgtk-3-0 fonts-liberation fonts-noto-color-emoji \
+    --no-install-recommends && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set workdir and copy files
 WORKDIR /app
-
-# Copy project files
 COPY . .
 
-# Upgrade pip and install Python dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers with dependencies
-RUN playwright install chromium --with-deps
+# ✅ Install Playwright browsers during image build
+RUN playwright install --with-deps
 
-# Optional: Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PLAYWRIGHT_BROWSERS_PATH=0
+# ✅ Make sure runtime knows where to find the browsers
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
-# Start the application
+# Default command to run your app
 CMD ["python", "main.py"]
