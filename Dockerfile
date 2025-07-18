@@ -15,11 +15,11 @@ COPY . .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# ✅ Install Playwright browsers during image build
-RUN playwright install-deps && playwright install chromium
-
 # ✅ Make sure runtime knows where to find the browsers
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+# ✅ Install Playwright browsers during image build
+RUN playwright install-deps && playwright install chromium
 
 # Default command to run your app
 CMD ["python", "main.py"]
