@@ -1,21 +1,20 @@
-# Use official Playwright Python base image with Chromium installed
+# Use official Playwright image with Python and Chromium
 FROM mcr.microsoft.com/playwright/python:v1.53.0-jammy
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy all project files into the container
+# Copy project files
 COPY . .
 
 # Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Install Playwright browsers and dependencies
-#generic comment
+# Install Playwright browsers with dependencies
 RUN playwright install --with-deps
 
-# Set environment variables
+# Optional: Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PLAYWRIGHT_BROWSERS_PATH=0
 
