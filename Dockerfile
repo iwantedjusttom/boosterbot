@@ -12,6 +12,7 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # Install Playwright browsers and dependencies
+#generic comment
 RUN playwright install --with-deps
 
 # Set environment variables
