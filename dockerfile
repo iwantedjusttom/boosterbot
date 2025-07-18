@@ -6,6 +6,7 @@ COPY . .
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN playwright install --with-deps
 
 ENV PYTHONUNBUFFERED=1
 ENV PLAYWRIGHT_BROWSERS_PATH=0
