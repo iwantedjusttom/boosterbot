@@ -1,63 +1,41 @@
-# This code is based on the following example:
-# https://discordpy.readthedocs.io/en/stable/quickstart.html#a-minimal-bot
-
-import os
 import discord
+import asyncio
+from discord.ext import commands
 from playwright.async_api import async_playwright
 
-TOKEN = os.environ['DISCORD_BOT_TOKEN']
+TOKEN = "YOUR_DISCORD_BOT_TOKEN"
+TARGET_URL = "https://example.com"  # Replace with the actual URL to scrape
 
 intents = discord.Intents.default()
 intents.message_content = True
-client = discord.Client(intents=intents)
 
-async def get_mmr(url):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        await page.goto(url)
-        await page.wait_for_timeout(3000)  # Wait for MMR content to load
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-        try:
-            cards = await page.query_selector_all("div.trn-card--dark")
-            results = []
+async def fetch_mmr(url: str) -> str:
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
+            await page.goto(url)
+            await page.wait_for_selector("span.value")
 
-            for card in cards:
-                header = await card.query_selector("div.trn-card__header")
-                if not header:
-                    continue
-                mode = await header.inner_text()
-
-                mmr_el = await card.query_selector("div.trn-defstat__value")
-                if mmr_el:
-                    mmr = await mmr_el.inner_text()
-                    results.append(f"{mode.strip()}: {mmr.strip()}")
-
-            return "\n".join(results) if results else "Couldn't find MMRs."
-
-        except Exception as e:
-            return f"Error while fetching MMR: {e}"
-        finally:
+            mmr_element = await page.query_selector("span.value")
+            mmr = await mmr_element.text_content()
             await browser.close()
 
-@client.event
+            return mmr.strip()
+    except Exception as e:
+        return f"Error fetching MMR: {e}"
+
+@bot.event
 async def on_ready():
-    print(f"✅ Logged in as {client.user}")
+    print(f"Logged in as {bot.user}")
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+@bot.command()
+async def mmr(ctx):
+    await ctx.send("Fetching MMR, please wait...")
+    mmr_value = await fetch_mmr(TARGET_URL)
+    await ctx.send(f"MMR results:\n{mmr_value}")
 
-    if message.content.startswith('!mmr'):
-        parts = message.content.split(' ')
-        if len(parts) < 2:
-            await message.channel.send("Please provide a valid Rocket League Tracker URL.")
-            return
-
-        url = parts[1]
-        await message.channel.send("Fetching MMR, please wait...")
-        mmr = await get_mmr(url)
-        await message.channel.send(f"MMR results:\n{mmr}")
-
-client.run(TOKEN)
+if __name__ == "__main__":
+    bot.run(TOKEN)
